@@ -1,4 +1,4 @@
-from typing import Any, Dict, Callable, cast
+from typing import Any, Callable, Dict, cast
 
 from flask import Blueprint
 from flask import Response as FlaskResponse
