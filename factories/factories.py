@@ -7,7 +7,7 @@ from app.models import Client, Parking
 fake = Faker()
 
 
-class ClientFactory(factory.alchemy.SQLAlchemyModelFactory): # type: ignore[misc]
+class ClientFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore[misc]
     class Meta:
         model = Client
         sqlalchemy_session = db.session
@@ -18,7 +18,7 @@ class ClientFactory(factory.alchemy.SQLAlchemyModelFactory): # type: ignore[misc
     car_number = factory.Faker("bothify", text="???###")
 
 
-class ParkingFactory(factory.alchemy.SQLAlchemyModelFactory): # type: ignore[misc]
+class ParkingFactory(factory.alchemy.SQLAlchemyModelFactory):  # type: ignore[misc]
     class Meta:
         model = Parking
         sqlalchemy_session = db.session
@@ -27,4 +27,3 @@ class ParkingFactory(factory.alchemy.SQLAlchemyModelFactory): # type: ignore[mis
     opened = factory.Faker("boolean")
     count_places = factory.Faker("random_int", min=5, max=100)
     count_available_places = factory.LazyAttribute(lambda o: o.count_places)
-

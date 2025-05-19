@@ -1,12 +1,13 @@
 import pytest
-
 from flask.testing import FlaskClient
 
 from app.models import Client, Parking
 
 
 @pytest.mark.parametrize("url", ["/clients", "/clients/1"])
-def test_get_endpoints(client: FlaskClient, test_data: tuple[Client, Parking], url: str) -> None:
+def test_get_endpoints(
+    client: FlaskClient, test_data: tuple[Client, Parking], url: str
+) -> None:
     client_obj, _ = test_data
     response = client.get(url.replace("1", str(client_obj.id)))
     assert response.status_code == 200
