@@ -1,6 +1,8 @@
-from flask import Blueprint, request, jsonify
-from .models import db, Client, Parking, ClientParking
 from datetime import datetime
+
+from flask import Blueprint, jsonify, request
+
+from .models import Client, ClientParking, Parking, db
 
 bp = Blueprint("api", __name__)
 
