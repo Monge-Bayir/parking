@@ -1,76 +1,50 @@
-from datetime import datetime
+from typing import Any, Dict
 
 from flask import Blueprint, jsonify, request
+from werkzeug.wrappers import Response
 
 from .models import Client, ClientParking, Parking, db
 
 bp = Blueprint("api", __name__)
 
-
-@bp.route("/clients", methods=["GET"])
-def get_clients():
-    return jsonify([{"id": c.id, "name": c.name} for c in Client.query.all()])
-
-
-@bp.route("/clients/<int:client_id>", methods=["GET"])
-def get_client(client_id):
-    c = Client.query.get_or_404(client_id)
-    return jsonify({"id": c.id, "name": c.name, "surname": c.surname})
-
-
 @bp.route("/clients", methods=["POST"])
-def create_client():
-    data = request.json
-    client = Client(**data)
+def create_client()  -> Response | tuple[Response, int]:
+    data: Dict[str, Any] = request.get_json()
+    name: str = data["name"]
+    client = Client(name=name)
     db.session.add(client)
     db.session.commit()
-    return jsonify({"id": client.id}), 201
+    return jsonify({"id": client.id, "name": client.name}), 201
 
+@bp.route("/clients/<int:client_id>", methods=["GET"])
+def get_client(client_id: int) -> Response | tuple[Response, int]:
+    client = Client.query.get_or_404(client_id)
+    return jsonify({"id": client.id, "name": client.name})
 
 @bp.route("/parkings", methods=["POST"])
-def create_parking():
-    data = request.json
-    parking = Parking(**data)
+def create_parking() -> Response | tuple[Response, int]:
+    data: Dict[str, Any] = request.get_json()
+    location: str = data["location"]
+    parking = Parking(location=location)
     db.session.add(parking)
     db.session.commit()
-    return jsonify({"id": parking.id}), 201
+    return jsonify({"id": parking.id, "location": parking.location}), 201
 
+@bp.route("/parkings/<int:parking_id>", methods=["GET"])
+def get_parking(parking_id: int) -> Response | tuple[Response, int]:
+    parking = Parking.query.get_or_404(parking_id)
+    return jsonify({"id": parking.id, "location": parking.location})
 
-@bp.route("/client_parkings", methods=["POST"])
-def enter_parking():
-    data = request.json
-    parking = Parking.query.get_or_404(data["parking_id"])
-    if not parking.opened or parking.count_available_places <= 0:
-        return jsonify({"error": "Parking closed or full"}), 400
-    client = Client.query.get_or_404(data["client_id"])
-    if not client.credit_card:
-        return jsonify({"error": "No credit card"}), 400
+@bp.route("/assign", methods=["POST"])
+def assign_client_to_parking() -> Response | tuple[Response, int]:
+    data: Dict[str, Any] = request.get_json()
+    client_id: int = data["client_id"]
+    parking_id: int = data["parking_id"]
 
-    parking.count_available_places -= 1
-    log = ClientParking(
-        client_id=client.id, parking_id=parking.id, time_in=datetime.now()
+    client_parking = ClientParking(
+        client_id=client_id,
+        parking_id=parking_id,
     )
-    db.session.add(log)
+    db.session.add(client_parking)
     db.session.commit()
-    return jsonify({"status": "entered"}), 200
-
-
-@bp.route("/client_parkings", methods=["DELETE"])
-def exit_parking():
-    data = request.json
-    log = ClientParking.query.filter_by(
-        client_id=data["client_id"], parking_id=data["parking_id"]
-    ).first_or_404()
-    parking = Parking.query.get_or_404(data["parking_id"])
-    client = Client.query.get_or_404(data["client_id"])
-
-    if not client.credit_card:
-        return jsonify({"error": "No credit card"}), 400
-
-    log.time_out = datetime.now()
-    if log.time_out < log.time_in:
-        return jsonify({"error": "Invalid time"}), 400
-    parking.count_available_places += 1
-
-    db.session.commit()
-    return jsonify({"status": "exited"}), 200
+    return jsonify({"message": "Client assigned to parking"}), 201

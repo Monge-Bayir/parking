@@ -1,33 +1,23 @@
+from typing import Generator
+
 import pytest
+from flask import Flask
+from flask.testing import FlaskClient
 
 from app import create_app, db
-from app.models import Client, Parking
 from config import TestConfig
 
 
 @pytest.fixture
-def app():
+def app() -> Generator[Flask, None, None]:
     app = create_app(TestConfig)
     with app.app_context():
         db.create_all()
         yield app
+        db.session.remove()
         db.drop_all()
 
 
 @pytest.fixture
-def client(app):
+def client(app: Flask) -> FlaskClient:
     return app.test_client()
-
-
-@pytest.fixture
-def test_data(app):
-    with app.app_context():
-        client = Client(
-            name="Ivan", surname="Ivanov", credit_card="123456", car_number="A123BC"
-        )
-        parking = Parking(
-            address="Main St", opened=True, count_places=10, count_available_places=10
-        )
-        db.session.add_all([client, parking])
-        db.session.commit()
-        return client, parking
