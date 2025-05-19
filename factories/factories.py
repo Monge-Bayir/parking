@@ -5,6 +5,7 @@ from app import db
 
 fake = Faker()
 
+
 class ClientFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Client
@@ -14,6 +15,7 @@ class ClientFactory(factory.alchemy.SQLAlchemyModelFactory):
     surname = factory.Faker("last_name")
     credit_card = factory.Faker("credit_card_number")
     car_number = factory.Faker("bothify", text="???###")
+
 
 class ParkingFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:

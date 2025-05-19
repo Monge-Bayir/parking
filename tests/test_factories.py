@@ -1,11 +1,13 @@
 from factories.factories import ClientFactory, ParkingFactory
 from app import db
 
+
 def test_create_client_with_factory(app):
     with app.app_context():
         client = ClientFactory()
         db.session.commit()
         assert client.id is not None
+
 
 def test_create_parking_with_factory(app):
     with app.app_context():
