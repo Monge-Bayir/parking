@@ -22,7 +22,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt  # ← сюда положи свои зависимости
         pip install flake8 isort black mypy pytest
 
     - name: Run flake8
@@ -38,4 +37,4 @@ jobs:
       run: mypy .
 
     - name: Run tests
-      run: pytest
+      run: PYTHONPATH=. pytest
